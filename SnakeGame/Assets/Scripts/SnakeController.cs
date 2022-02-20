@@ -208,7 +208,6 @@ public class SnakeController : MonoBehaviour
         }
         if (rand==2 && _snake.Count>1)
         {
-            //ToDo : Kuyruk yokken gelirse bug
            
             Destroy(_snake[_snake.Count - 1].gameObject);//Son kuyrugu yok et ;
             _snake.RemoveAt(_snake.Count - 1);
