@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Wall
   - Food
+  - Poison
+  - Velocity
   layers:
   - Default
   - TransparentFX

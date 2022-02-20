@@ -8,23 +8,41 @@ public class SnakeController : MonoBehaviour
     private Vector2 AreaLimit = new Vector2(13, 24);
     private Vector2 _direction = Vector2.down;//yön
 
-    [SerializeField] private float _GameSpeed = .3f;
+    [SerializeField] private float _GameSpeed = .2f;
+
     [SerializeField] private GameObject tailPrefeb;
     [SerializeField] private GameObject food;
+    [SerializeField] private GameObject poison;//zehir
+    [SerializeField] private GameObject velocity;//Hýz
+
     private List<Transform> _snake = new List<Transform>();
 
     [SerializeField] private UnityEngine.UI.Text ScoreText;
     [SerializeField] private UnityEngine.UI.Text GameOverText;
+    [SerializeField] private UnityEngine.UI.Text HealtText;
 
-    private bool _grow;
+    private bool _grow = false;
 
     private int score;
 
     public int Score
     {
         get { return score; }
-        set { score = value;
-            ScoreText.text = score.ToString();        
+        set
+        {
+            score = value;
+            ScoreText.text = score.ToString();
+        }
+    }
+    private int healt;
+
+    public int Healt
+    {
+        get { return healt; }
+        set
+        {
+            healt = value;
+            HealtText.text = healt.ToString();
         }
     }
 
@@ -32,8 +50,9 @@ public class SnakeController : MonoBehaviour
     private void Start()
     {
         Score = 0;
+        Healt = 3;
 
-        ChangePositionFood();
+        ChangePosition();
         StartCoroutine(routine: SnakeMove());
         _snake.Add(this.transform);
     }
@@ -60,10 +79,6 @@ public class SnakeController : MonoBehaviour
         {
             _direction = Vector2.down;
         }
-
-
-
-
 
     }
     private IEnumerator SnakeMove()//Yilan surekli haraket etsin diye yazilan fonkstiuon
@@ -103,58 +118,107 @@ public class SnakeController : MonoBehaviour
         {
             Dead();
         }
+        if (other.CompareTag("Velocity"))
+        {
+            VelocityF();
+        }
+        if (other.CompareTag("Poison"))
+        {
+            PoisonF();
+        }
+
     }
 
     private void Grow()
     {
-        Debug.Log("Grow");
+
         Score++;
+        
 
         var tail = Instantiate(tailPrefeb);
         _snake.Add(tail.transform);
         _snake[_snake.Count - 1].position = _snake[_snake.Count - 2].position;
-        ChangePositionFood();
+        ChangePosition();
 
     }
 
-    private void ChangePositionFood()
+    private void ChangePosition()
     {
 
         Vector2 newFoodPosition;
+        Vector2 newVeloPosition;
+        Vector2 newPoisonPosition;
         do
         {
             var x = (int)Random.Range(1, AreaLimit.x);
             var y = (int)Random.Range(1, AreaLimit.y);
             newFoodPosition = new Vector2(x, y);
 
-        } while (!CanSpawnFood(newFoodPosition));
+            var x1 = (int)Random.Range(1, AreaLimit.x);
+            var y1 = (int)Random.Range(1, AreaLimit.y);
+            newVeloPosition = new Vector2(x1, y1); 
+            
+            var x2 = (int)Random.Range(1, AreaLimit.x);
+            var y2 = (int)Random.Range(1, AreaLimit.y);
+            newPoisonPosition = new Vector2(x2, y2);
 
+        } while (!CanSpawn(newFoodPosition) && !CanSpawn(newVeloPosition) && !CanSpawn(newPoisonPosition));
 
         food.transform.position = (Vector3)newFoodPosition;
+        velocity.transform.position = (Vector3)newVeloPosition;
+        poison.transform.position = (Vector3)newPoisonPosition;
+
     }
 
-    private bool CanSpawnFood(Vector3 newposition)
+    private bool CanSpawn(Vector3 newposition)
     {
         foreach (var item in _snake)
         {
             var x = Mathf.RoundToInt(item.position.x);
             var y = Mathf.RoundToInt(item.position.y);
-            
+
             if (item.transform.position == newposition)
             {
                 return false;
             }
         }
-        return true;    
+        return true;
+    }
+
+    private void VelocityF()
+    {
+        _GameSpeed = .75f * _GameSpeed;
+        ChangePosition();
+    }
+
+    private void PoisonF()
+    {
+
+        Healt--;
+        if (Healt<=0)
+        {
+            Dead();
+        }
+        
+        int rand = (int)Random.Range(1, 3);
+
+        if (rand==1)
+        {
+            _GameSpeed = 1.25f * _GameSpeed;
+        }
+        if (rand==2 && _snake.Count>1)
+        {
+            //ToDo : Kuyruk yokken gelirse bug
+            Destroy(_snake[_snake.Count - 1].gameObject);//Son kuyrugu yok et ;
+            Score--;//Score dusur
+        }
+        ChangePosition();
     }
 
     private void Dead()
     {
-        Debug.Log("dead");
-
         GameOverText.gameObject.SetActive(true);
         StopAllCoroutines();
-
     }
 
 
