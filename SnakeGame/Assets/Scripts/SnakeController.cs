@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class SnakeController : MonoBehaviour
 {
@@ -18,8 +19,8 @@ public class SnakeController : MonoBehaviour
     private List<Transform> _snake = new List<Transform>();
 
     [SerializeField] private UnityEngine.UI.Text ScoreText;
-    [SerializeField] private UnityEngine.UI.Text GameOverText;
     [SerializeField] private UnityEngine.UI.Text HealtText;
+    [SerializeField] private UnityEngine.UI.Image GameOverBg;
 
     private bool _grow = false;
 
@@ -218,8 +219,13 @@ public class SnakeController : MonoBehaviour
 
     private void Dead()
     {
-        GameOverText.gameObject.SetActive(true);
+        GameOverBg.gameObject.SetActive(true);
         StopAllCoroutines();
+    }
+
+    public void ReplayButton()
+    {
+        SceneManager.LoadScene(0);
     }
 
 
